@@ -34,7 +34,7 @@ function setStatusBarItem(status){
   if(status != 'dispose'){
     if     (status == 'create')   stbarConfig = ['Creating Grails App...','#ffffff'];
     else if(status == 'done')     stbarConfig = ['Grails Done...', '#ffffff'];
-    else if(status == 'init')     stbarConfig = ['Performing Grails Application Init...','#3331b0'];
+    else if(status == 'init')     stbarConfig = ['Performing Grails Application Init...','#ffffff'];
     else if(status == 'running')  stbarConfig = ['Grails Application Running...','#3bad3d'];
     else if(status == 'stopping') stbarConfig = ['Stopping Application...','#bd2438'];
     statusBarItem.text  = stbarConfig[0];
@@ -78,10 +78,35 @@ function createApp(){
   });
 }
 
+function runApp(){
+  defineAppProperties();
+  setStatusBarItem('init');
+  grailsChannel.show();
+  let promise = new Promise(resolve =>{
+    vscode.window.showInformationMessage(`Running App '${applicationName}'...`);
+    let result = cp.exec(`grails run-app`, {cwd: getWorkspaceDir()});
+    result.stdout.on("data", (data)=>{
+      outputFilter = data;
+      infoCatcher  = outputFilter.match(/\w.+/gi);
+      urlCatcher   = outputFilter.match(/(http|https)?:\/\/.+/gi);
+      if(infoCatcher != null){
+        grailsChannel.append(`${infoCatcher[0]}\n`);
+        if(urlCatcher != null){
+          setStatusBarItem('running');
+          vscode.env.openExternal(vscode.Uri.parse(urlCatcher[0]));
+        }
+      }
+      resolve();
+    });
+  });
+  return promise;
+}
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
   defineAppProperties,
   setStatusBarItem,
-  createApp
+  createApp,
+  runApp
 }

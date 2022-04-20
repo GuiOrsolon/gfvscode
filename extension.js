@@ -12,7 +12,7 @@ function activate(context) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.runnApp', function(){
-
+			functions.runApp();
 		})
 	);
 
