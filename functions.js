@@ -15,6 +15,7 @@ let createCatcher   = '';
 let urlCatcher      = '';
 let statusBarItem   = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 let stbarConfig     = [];
+let stopCatcher     = '';
 
 function showGrailsChannel() {
   grailsChannel.show();
@@ -37,6 +38,7 @@ function setStatusBarItem(status){
     else if(status == 'init')     stbarConfig = ['Performing Grails Application Init...','#ffffff'];
     else if(status == 'running')  stbarConfig = ['Grails Application Running...','#3bad3d'];
     else if(status == 'stopping') stbarConfig = ['Stopping Application...','#bd2438'];
+    else if(status == 'stopped')  stbarConfig = ['Grails Application Stopped...','#ffffff'];
     statusBarItem.text  = stbarConfig[0];
     statusBarItem.color = stbarConfig[1];
     statusBarItem.show();
@@ -102,11 +104,36 @@ function runApp(){
   return promise;
 }
 
+function stopApp(){
+  defineAppProperties();
+  setStatusBarItem('stopping');
+  grailsChannel.show();
+  let promise = new Promise(resolve =>{
+    vscode.window.showInformationMessage(`Stopping App '${applicationName}'...`);
+    let result = cp.exec(`grails stop-app`, {cwd: getWorkspaceDir()});
+    result.stdout.on("data", (data)=>{
+      outputFilter = data;
+      infoCatcher  = outputFilter.match(/\w.+/gi);
+      stopCatcher  = outputFilter.match(/Server Stopped/gi);
+      if(infoCatcher != null){
+        grailsChannel.append(`${infoCatcher[0]}\n`);
+        if(stopCatcher != null){
+          setStatusBarItem('stopped');
+          vscode.window.showInformationMessage(`Grails Application '${applicationName}' was stopped.`);
+        }
+      }
+      resolve();
+    });
+  });
+  return promise;
+}
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
   defineAppProperties,
   setStatusBarItem,
   createApp,
-  runApp
+  runApp,
+  stopApp
 }
