@@ -29,6 +29,7 @@ function defineAppProperties(){
   let properties  = pr(path.join(getWorkspaceDir(),'application.properties'));
   grailsVersion   = properties.get("app.grails.version");
   applicationName = properties.get("app.name");
+  vscode.window.showInformationMessage(`Grails Version Project: ${grailsVersion}`);
 }
 
 function setStatusBarItem(status){
@@ -128,6 +129,56 @@ function stopApp(){
   return promise;
 }
 
+function createDomainClass(){
+  vscode.window.showInputBox(cts.optInputDomainName).then(domainName =>{
+    if(domainName != null && domainName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${domainName}' Domain Class...`);
+        let result = cp.exec(`grails create-domain-class ${domainName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          outputFilter  = data;
+          infoCatcher   = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created file grails-app/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Domain Class '${domainName}' was created.`);
+            }
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
+
+function createController(){
+  vscode.window.showInputBox(cts.optInputControllerName).then(controllerName =>{
+    if(controllerName != null && controllerName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${controllerName}' Controller...`);
+        let result = cp.exec(`grails create-controller ${controllerName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          outputFilter  = data;
+          infoCatcher   = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created file grails-app\/controllers/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Controller '${controllerName}Controller' was created.`);
+            }
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
@@ -135,5 +186,7 @@ module.exports ={
   setStatusBarItem,
   createApp,
   runApp,
-  stopApp
+  stopApp,
+  createDomainClass,
+  createController
 }

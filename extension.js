@@ -18,19 +18,19 @@ function activate(context) {
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.stopApp', function(){
-
+			functions.stopApp();
 		})
 	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.createDomainClass', function(){
-
+			functions.createDomainClass();
 		})
 	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.createController', function(){
-			
+			functions.createController();
 		})
 	);
 
