@@ -4,6 +4,9 @@ const functions = require('./functions');
 
 function activate(context) {
 
+	if(functions.checkIfIsAGrailsProject())
+		functions.defineAppProperties();
+
   context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.createApp', function(){
 			functions.createApp();

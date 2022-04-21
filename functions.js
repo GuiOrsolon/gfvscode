@@ -3,18 +3,21 @@ const vscode = require('vscode');
 const pr     = require('properties-reader');
 const path   = require('path');
 const cp     = require('child_process');
+const fs     = require('fs');
 //Import constants of extension
 const cts    = require('./constants');
-
+//VSCode Interface Components
 let grailsChannel   = vscode.window.createOutputChannel(`Grails`);
+let statusBarItem   = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+let stbarConfig     = [];
+//Global Variables
 let applicationName = '';
 let grailsVersion   = '';
+//Filters and Catchers
 let outputFilter    = '';
 let infoCatcher     = '';
 let createCatcher   = '';
 let urlCatcher      = '';
-let statusBarItem   = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-let stbarConfig     = [];
 let stopCatcher     = '';
 
 function showGrailsChannel() {
@@ -25,11 +28,18 @@ function getWorkspaceDir(){
   return path.resolve(vscode.workspace.workspaceFolders[0].uri.fsPath);
 }
 
+function checkIfIsAGrailsProject(){
+  if(fs.existsSync(path.join(getWorkspaceDir(),'grailsw')))
+    return true;
+  else
+    return false;
+}
+
 function defineAppProperties(){
   let properties  = pr(path.join(getWorkspaceDir(),'application.properties'));
   grailsVersion   = properties.get("app.grails.version");
   applicationName = properties.get("app.name");
-  vscode.window.showInformationMessage(`Grails Version Project: ${grailsVersion}`);
+  vscode.window.showInformationMessage(`Grails Version Project detected: ${grailsVersion}`);
 }
 
 function setStatusBarItem(status){
@@ -179,9 +189,12 @@ function createController(){
   });
 }
 
+
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
+  checkIfIsAGrailsProject,
   defineAppProperties,
   setStatusBarItem,
   createApp,
