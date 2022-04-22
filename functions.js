@@ -189,7 +189,30 @@ function createController(){
   });
 }
 
-
+function createService(){
+  vscode.window.showInputBox(cts.optInputServiceName).then(serviceName =>{
+    if(serviceName != null && serviceName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${serviceName}' Service...`);
+        let result = cp.exec(`grails create-service ${serviceName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          outputFilter = data;
+          infoCatcher  = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created file grails-app\/services/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Service '${serviceName}Service' was created.`);
+            }
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
 
 module.exports ={
   showGrailsChannel,
@@ -201,5 +224,6 @@ module.exports ={
   runApp,
   stopApp,
   createDomainClass,
-  createController
+  createController,
+  createService
 }

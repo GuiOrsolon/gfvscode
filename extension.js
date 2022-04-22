@@ -37,11 +37,11 @@ function activate(context) {
 		})
 	);
 
-	let disposable = vscode.commands.registerCommand('gfvscode.helloWorld', function () {
-		vscode.window.showInformationMessage('Hello World from Grails!');
-	});
-
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createService', function(){
+			functions.createService();
+		})
+	);
 }
 
 // this method is called when your extension is deactivated

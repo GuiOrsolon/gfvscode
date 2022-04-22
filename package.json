@@ -39,6 +39,11 @@
         "command": "gfvscode.createController",
         "category": "Grails",
         "title": "Create Controller"
+      },
+      {
+        "command": "gfvscode.createService",
+        "category": "Grails",
+        "title": "Create Service"
       }
     ]
   },

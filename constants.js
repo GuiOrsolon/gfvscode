@@ -3,10 +3,12 @@ const optCreateApp 			      = { canSelectFiles: false						, canSelectFolders: t
 const optInputAppName 		    = { placeHolder: "Application Name"			, prompt: "Please, input the Application Name (without special characters)" };
 const optInputDomainName      = { placeHolder: "Domain Class Name", prompt: "Please, input the Domain Class Name" };
 const optInputControllerName	= { placeHolder: "Controller Name"	, prompt: "Please, input the Controller Name (without 'Controller' in their name)." };
+const optInputServiceName	    = { placeHolder: "Service Name"	, prompt: "Please, input the Service Name." };
 
 module.exports = {
   optCreateApp,
   optInputAppName,
   optInputDomainName,
-  optInputControllerName
+  optInputControllerName,
+  optInputServiceName
 }
