@@ -20,6 +20,7 @@ let createCatcher   = '';
 let urlCatcher      = '';
 let stopCatcher     = '';
 
+//Helper functions
 function showGrailsChannel() {
   grailsChannel.show();
 }
@@ -58,39 +59,7 @@ function setStatusBarItem(status){
   }
 }
 
-function createApp(){
-  vscode.window.showOpenDialog(cts.optCreateApp).then(folder => {
-    if(folder != null && folder.length > 0){
-      vscode.window.showInputBox(cts.optInputAppName).then(appName =>{
-        if(appName != null && appName.length > 0){
-          grailsChannel.show();
-          let promise = new Promise(resolve => {
-            vscode.window.showInformationMessage(`Creating App '${appName}'...`);
-            setStatusBarItem('create');
-            let result = cp.exec(`grails create-app ${appName}`, {cwd: folder[0].fsPath});
-            result.stdout.on("data", (data) => {
-              outputFilter  = data;
-              infoCatcher   = outputFilter.match(/\w.+/gi);
-              createCatcher = outputFilter.match(/Created Grails Application/gi);
-              if(infoCatcher != null){
-                grailsChannel.append(`${infoCatcher[0]}\n`);
-                if(createCatcher != null){
-                  let terminal = vscode.window.createTerminal({cwd: folder[0].fsPath});
-                  terminal.sendText(`code -r ${appName}`);
-                  terminal.dispose;
-                  setStatusBarItem('done');
-                }
-              }
-              resolve();
-            });
-          });
-          return promise;
-        }
-      });
-    }
-  });
-}
-
+//Development functions
 function runApp(){
   defineAppProperties();
   setStatusBarItem('init');
@@ -137,6 +106,40 @@ function stopApp(){
     });
   });
   return promise;
+}
+
+//Objects Creation Functions
+function createApp(){
+  vscode.window.showOpenDialog(cts.optCreateApp).then(folder => {
+    if(folder != null && folder.length > 0){
+      vscode.window.showInputBox(cts.optInputAppName).then(appName =>{
+        if(appName != null && appName.length > 0){
+          grailsChannel.show();
+          let promise = new Promise(resolve => {
+            vscode.window.showInformationMessage(`Creating App '${appName}'...`);
+            setStatusBarItem('create');
+            let result = cp.exec(`grails create-app ${appName}`, {cwd: folder[0].fsPath});
+            result.stdout.on("data", (data) => {
+              outputFilter  = data;
+              infoCatcher   = outputFilter.match(/\w.+/gi);
+              createCatcher = outputFilter.match(/Created Grails Application/gi);
+              if(infoCatcher != null){
+                grailsChannel.append(`${infoCatcher[0]}\n`);
+                if(createCatcher != null){
+                  let terminal = vscode.window.createTerminal({cwd: folder[0].fsPath});
+                  terminal.sendText(`code -r ${appName}`);
+                  terminal.dispose;
+                  setStatusBarItem('done');
+                }
+              }
+              resolve();
+            });
+          });
+          return promise;
+        }
+      });
+    }
+  });
 }
 
 function createDomainClass(){
@@ -220,10 +223,9 @@ module.exports ={
   checkIfIsAGrailsProject,
   defineAppProperties,
   setStatusBarItem,
-  createApp,
   runApp,
   stopApp,
+  createApp,  
   createDomainClass,
-  createController,
-  createService
+  createController
 }

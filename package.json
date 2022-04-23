@@ -16,11 +16,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "gfvscode.createApp",
-        "category": "Grails",
-        "title": "Create App"
-      },
-      {
         "command": "gfvscode.runnApp",
         "category": "Grails",
         "title": "Run App"
@@ -30,6 +25,11 @@
         "category": "Grails",
         "title": "Stop App"
       },
+      {
+        "command": "gfvscode.createApp",
+        "category": "Grails",
+        "title": "Create App"
+      },      
       {
         "command": "gfvscode.createDomainClass",
         "category": "Grails",
