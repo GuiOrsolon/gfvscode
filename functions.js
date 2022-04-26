@@ -43,6 +43,10 @@ function defineAppProperties(){
   vscode.window.showInformationMessage(`Grails Version Project detected: ${grailsVersion}`);
 }
 
+function getGrailsVersion(){
+  return grailsVersion;
+}
+
 function setStatusBarItem(status){
   if(status != 'dispose'){
     if     (status == 'create')   stbarConfig = ['Creating Grails App...','#ffffff'];
@@ -57,6 +61,36 @@ function setStatusBarItem(status){
   }else{
     statusBarItem.hide();
   }
+}
+
+function getFileListFolder(typeFiles){
+  let directory = '';
+  let fileList = [];
+  directory = path.join(getWorkspaceDir(),`grails-app/${typeFiles}/${applicationName}`);
+  fs.readdir(directory, (err, files) =>{
+    files.forEach(file =>{
+      fileList.append(file.match(/[^.groovy\n]+/gi));
+    });
+  });
+  return fileList;
+}
+
+function filterVersion(version, resource){
+  let result;
+  if(resource == 'create-filter'){
+    if(parseInt(version[0]) > 3){
+      result = false;
+    }else{
+      result = true;
+    }
+  }else if(resource == 'create-interceptor'){
+    if(parseInt(version[0] > 3)){
+      result = true;
+    }else{
+      result = false;
+    }
+  }
+  return result;
 }
 
 //Development functions
@@ -217,15 +251,80 @@ function createService(){
   });
 }
 
+function createFilter(){
+  if(!filterVersion(getGrailsVersion(),'create-filter')){
+    vscode.window.showErrorMessage(`The 'create-filter' method is deprecated. Use 'create-interceptior'.`);
+  }else{
+    vscode.window.showInputBox(cts.optInputFilterName).then(filterName =>{
+      if(filterName != null && filterName.length > 0){
+        grailsChannel.show();
+        let promise = new Promise(resolve =>{
+          vscode.window.showInformationMessage(`Creating '${filterName}' Filter...`);
+          let result = cp.exec(`grails create-filter ${filterName}`,{cwd: getWorkspaceDir()});
+          result.stdout.on("data", (data) =>{
+            outputFilter = data;
+            infoCatcher  = outputFilter.match(/\w.+/gi);
+            createCatcher = outputFilter.match(/Created file grails-app\/conf/gi);
+            if(infoCatcher != null){
+              grailsChannel.append(`${infoCatcher[0]}\n`);
+              if(createCatcher != null){
+                vscode.window.showInformationMessage(`Filter '${filterName}' was created.`);
+              }
+            }
+            resolve();
+          });
+        });
+        return promise;
+      }
+    });
+  }
+}
+
+function createInterceptor(){
+  if(!filterVersion(getGrailsVersion(),'create-interceptor')){
+    vscode.window.showErrorMessage(`The 'create-interceptor' method not supported in Grails Version < 3. Use 'create-filters'.`);
+  }else{
+    vscode.window.showInputBox(cts.optInputInterceptorName).then(interceptorName =>{
+      if(interceptorName != null && interceptorName.length > 0){
+        grailsChannel.show();
+        let promise = new Promise(resolve =>{
+          vscode.window.showInformationMessage(`Creating '${interceptorName}' Interceptor...`);
+          let result = cp.exec(`grails create-interceptor ${interceptorName}`, {cwd: getWorkspaceDir()})/
+          result.stdout.on("data", (data)=>{
+            outputFilter = data;
+            infoCatcher  = outputFilter.match(/\w.+/gi);
+            //revisar
+            createCatcher = outputFilter.match(/Created file grails-app/gi);
+            if(infoCatcher != null){
+              grailsChannel.append(`${infoCatcher[0]}\n`);
+              if(createCatcher != null){
+                vscode.window.showInformationMessage(`Interceptor '${interceptorName}' was created.`);
+              }
+            }
+            resolve();
+          });
+        });
+        return promise;
+      }
+    });
+  }
+}
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
   checkIfIsAGrailsProject,
   defineAppProperties,
+  getGrailsVersion,
   setStatusBarItem,
+  getFileListFolder,
+  filterVersion,
   runApp,
   stopApp,
   createApp,  
   createDomainClass,
-  createController
+  createController,
+  createService,
+  createFilter,
+  createInterceptor
 }

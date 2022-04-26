@@ -44,6 +44,21 @@
         "command": "gfvscode.createService",
         "category": "Grails",
         "title": "Create Service"
+      },
+      {
+        "command": "gfvscode.createFilter",
+        "category": "Grails",
+        "title": "Create Filter"
+      },
+      {
+        "command": "gfvscode.createInterceptor",
+        "category": "Grails",
+        "title": "Create Interceptor (Grails 3+)"
+      },
+      {
+        "command": "gfvscode.test",
+        "category": "Grails",
+        "title": "Tests"
       }
     ]
   },
