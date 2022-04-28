@@ -64,6 +64,12 @@ function activate(context) {
 				functions.createInterceptor();
 			})
 		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('gfvscode.createHibernateCfg', function(){
+				functions.createHibernateCfgXML();
+			})
+		);
 	}
 }
 

@@ -56,6 +56,11 @@
         "title": "Create Interceptor (Grails 3+)"
       },
       {
+        "command": "gfvscode.createHibernateCfg",
+        "category": "Grails",
+        "title": "Create Hibernate Configuration File XML"
+      },
+      {
         "command": "gfvscode.test",
         "category": "Grails",
         "title": "Tests"

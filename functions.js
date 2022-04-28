@@ -7,18 +7,18 @@ const fs     = require('fs');
 //Import constants of extension
 const cts    = require('./constants');
 //VSCode Interface Components
-let grailsChannel   = vscode.window.createOutputChannel(`Grails`);
-let statusBarItem   = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-let stbarConfig     = [];
+let grailsChannel    = vscode.window.createOutputChannel(`Grails`);
+let statusBarItem    = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+let stbarConfig      = [];
 //Global Variables
-let applicationName = '';
-let grailsVersion   = '';
+let applicationName  = '';
+let grailsVersion    = '';
 //Filters and Catchers
-let outputFilter    = '';
-let infoCatcher     = '';
-let createCatcher   = '';
-let urlCatcher      = '';
-let stopCatcher     = '';
+let outputFilter     = '';
+let infoCatcher      = '';
+let createCatcher    = '';
+let urlCatcher       = '';
+let stopCatcher      = '';
 
 //Helper functions
 function showGrailsChannel() {
@@ -289,7 +289,7 @@ function createInterceptor(){
         grailsChannel.show();
         let promise = new Promise(resolve =>{
           vscode.window.showInformationMessage(`Creating '${interceptorName}' Interceptor...`);
-          let result = cp.exec(`grails create-interceptor ${interceptorName}`, {cwd: getWorkspaceDir()})/
+          let result = cp.exec(`grails create-interceptor ${interceptorName}`, {cwd: getWorkspaceDir()});
           result.stdout.on("data", (data)=>{
             outputFilter = data;
             infoCatcher  = outputFilter.match(/\w.+/gi);
@@ -305,6 +305,40 @@ function createInterceptor(){
           });
         });
         return promise;
+      }
+    });
+  }
+}
+
+function createHibernateCfgXML(){
+  let hibernateFile = path.join(getWorkspaceDir(),'grails-app/conf/hibernate/hibernate.cfg.xml');
+  if(fs.existsSync(hibernateFile)){
+    vscode.window.showWarningMessage(`The file 'hibernate.cfg.xml' already exists. Overwrite it?`, 'Yes', 'No').then(selection =>{
+      if(selection === 'Yes'){
+        try{
+          fs.unlinkSync(hibernateFile);
+          grailsChannel.show();
+          let promise = new Promise(resolve =>{
+            let result = cp.exec(`grails create-hibernate-cfg-xml`,{cwd: getWorkspaceDir()});
+            result.stdout.on("data",(data)=>{
+              outputFilter     = data;
+              infoCatcher      = outputFilter.match(/\w.+/gi);
+              createCatcher    = outputFilter.match(/Created file grails-app\\conf\\hibernate\\hibernate.cfg.xml/gi);
+              if(infoCatcher != null){
+                grailsChannel.append(`${infoCatcher[0]}\n`);
+                if(createCatcher != null){
+                  vscode.window.showInformationMessage(`The 'hibernate.cfg.xml' file was created.`);
+                }
+              }
+              resolve();
+            });
+          });
+          return promise;
+        }catch(err){
+          console.error(err);
+        }
+      }else{
+        vscode.window.showInformationMessage(`Operation canceled by user.`);
       }
     });
   }
@@ -326,5 +360,6 @@ module.exports ={
   createController,
   createService,
   createFilter,
-  createInterceptor
+  createInterceptor,
+  createHibernateCfgXML
 }
