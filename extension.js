@@ -36,6 +36,18 @@ function activate(context) {
 		);
 
 		context.subscriptions.push(
+			vscode.commands.registerCommand('gfvscode.addProxy', function(){
+				functions.addProxy();
+			})
+		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('gfvscode.clearProxy', function(){
+				functions.clearProxy();
+			})
+		);
+
+		context.subscriptions.push(
 			vscode.commands.registerCommand('gfvscode.createDomainClass', function(){
 				functions.createDomainClass();
 			})

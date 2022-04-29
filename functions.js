@@ -19,6 +19,13 @@ let infoCatcher      = '';
 let createCatcher    = '';
 let urlCatcher       = '';
 let stopCatcher      = '';
+//Configuration Variables
+let nameProxy        = '';
+let hostProxy        = '';
+let portProxy        = '';
+let usernameProxy    = '';
+let passwordProxy    = '';
+let proxyCommand     = '';
 
 //Helper functions
 function showGrailsChannel() {
@@ -89,6 +96,18 @@ function filterVersion(version, resource){
     }else{
       result = false;
     }
+  }else if(resource == 'add-proxy'){
+    if(parseInt(version[0]) > 3){
+      result = false;
+    }else{
+      result = true;
+    }
+  }else if(resource == 'clear-proxy'){
+    if(parseInt(version[0]) > 3){
+      result = false;
+    }else{
+      result = true;
+    }
   }
   return result;
 }
@@ -140,6 +159,78 @@ function stopApp(){
     });
   });
   return promise;
+}
+
+//Configuration functios
+
+function addProxy(){
+  if(!filterVersion(getGrailsVersion(),'add-proxy')){
+    vscode.window.showErrorMessage(`The 'add-proxy' method is deprecated.`);
+  }else{
+    vscode.window.showInputBox(cts.optInputNameProxy).then(name =>{
+      if(name != null && name.length > 0){
+        nameProxy = name;
+        vscode.window.showInputBox(cts.optInputHostProxy).then(host =>{
+          if(host != null && host.length > 0){
+            hostProxy = host;
+            vscode.window.showInputBox(cts.optInputPortProxy).then(port =>{
+              if(port != null && port.length > 0 && port === parseInt(port,10)){
+                portProxy = port;
+                vscode.window.showInputBox(cts.optInputUsernameProxy).then(user =>{
+                  if(user != null && user.length > 0){
+                    usernameProxy = user;
+                    while(usernameProxy != null && passwordProxy == null){
+                      vscode.window.showInputBox(cts.optInputPasswordProxy).then(pass =>{
+                        if(pass != null && pass.length > 0){
+                          passwordProxy = pass;
+                        }
+                      });
+                    }
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+    if (nameProxy != null && hostProxy != null && portProxy != null){
+      proxyCommand = `grails add-proxy ${nameProxy} --host=${hostProxy} --port=${portProxy}`;
+      if(usernameProxy != null){
+        proxyCommand = proxyCommand.concat(`--username=${usernameProxy}`);
+        if(passwordProxy != null){
+          proxyCommand = proxyCommand.concat(`--password=${passwordProxy}`);
+        }
+      }
+    }
+    grailsChannel.show();
+    let promise = new Promise(resolve =>{
+      let result = cp.exec(proxyCommand,{cwd: getWorkspaceDir()});
+      result.stdout.on("data",(data)=>{
+        outputFilter = data;
+        infoCatcher  = outputFilter.match(/\w.+/gi);
+      })
+      resolve();
+    });
+    return promise;
+  }
+}
+
+function clearProxy(){
+  if(!filterVersion(getGrailsVersion(),'clear-proxy')){
+    vscode.window.showErrorMessage(`The 'clear-proxy' method is deprecated.`);
+  }else{
+    grailsChannel.show();
+    let promise = new Promise(resolve =>{
+      let result = cp.exec(`grails clear-proxy`,{cwd: getWorkspaceDir()});
+      result.stdout.on("data", (data)=>{
+        outputFilter = data;
+        infoCatcher  = outputFilter.match(/\w.+/gi);
+      });
+      resolve();
+    });
+    return promise;
+  }
 }
 
 //Objects Creation Functions
@@ -355,6 +446,8 @@ module.exports ={
   filterVersion,
   runApp,
   stopApp,
+  addProxy,
+  clearProxy,
   createApp,  
   createDomainClass,
   createController,

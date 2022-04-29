@@ -26,6 +26,16 @@
         "title": "Stop App"
       },
       {
+        "command": "gfvscode.addProxy",
+        "category": "Grails",
+        "title": "Add Proxy Configurations"
+      },
+      {
+        "command": "gfvscode.clearProxy",
+        "category": "Grails",
+        "title": "Clear Proxy Configurations"
+      },
+      {
         "command": "gfvscode.createApp",
         "category": "Grails",
         "title": "Create App"
