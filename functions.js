@@ -4,22 +4,33 @@ const pr     = require('properties-reader');
 const path   = require('path');
 const cp     = require('child_process');
 const fs     = require('fs');
+const os     = require('os');
+
 //Import constants of extension
+
 const cts    = require('./constants');
+
 //VSCode Interface Components
+
 let grailsChannel    = vscode.window.createOutputChannel(`Grails`);
 let statusBarItem    = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
 let stbarConfig      = [];
+
 //Global Variables
+
 let applicationName  = '';
 let grailsVersion    = '';
+
 //Filters and Catchers
+
 let outputFilter     = '';
 let infoCatcher      = '';
 let createCatcher    = '';
 let urlCatcher       = '';
 let stopCatcher      = '';
+
 //Configuration Variables
+
 let nameProxy        = '';
 let hostProxy        = '';
 let portProxy        = '';
@@ -28,6 +39,7 @@ let passwordProxy    = '';
 let proxyCommand     = '';
 
 //Helper functions
+
 function showGrailsChannel() {
   grailsChannel.show();
 }
@@ -108,11 +120,18 @@ function filterVersion(version, resource){
     }else{
       result = true;
     }
+  }else if(resource == 'remove-proxy'){
+    if(parseInt(version[0] > 3)){
+      result = false;
+    }else{
+      result = true;
+    }
   }
   return result;
 }
 
 //Development functions
+
 function runApp(){
   defineAppProperties();
   setStatusBarItem('init');
@@ -163,53 +182,57 @@ function stopApp(){
 
 //Configuration functios
 
-function addProxy(){
+async function addProxy(proxyWithUser){
   if(!filterVersion(getGrailsVersion(),'add-proxy')){
     vscode.window.showErrorMessage(`The 'add-proxy' method is deprecated.`);
   }else{
-    vscode.window.showInputBox(cts.optInputNameProxy).then(name =>{
-      if(name != null && name.length > 0){
-        nameProxy = name;
-        vscode.window.showInputBox(cts.optInputHostProxy).then(host =>{
-          if(host != null && host.length > 0){
-            hostProxy = host;
-            vscode.window.showInputBox(cts.optInputPortProxy).then(port =>{
-              if(port != null && port.length > 0 && port === parseInt(port,10)){
-                portProxy = port;
-                vscode.window.showInputBox(cts.optInputUsernameProxy).then(user =>{
-                  if(user != null && user.length > 0){
-                    usernameProxy = user;
-                    while(usernameProxy != null && passwordProxy == null){
-                      vscode.window.showInputBox(cts.optInputPasswordProxy).then(pass =>{
-                        if(pass != null && pass.length > 0){
-                          passwordProxy = pass;
-                        }
-                      });
-                    }
-                  }
-                });
-              }
-            });
+    nameProxy = await vscode.window.showInputBox(cts.optInputNameProxy);
+    if (nameProxy != null && nameProxy.length > 0){
+      hostProxy = await vscode.window.showInputBox(cts.optInputHostProxy);
+      if(hostProxy != null && hostProxy.length > 0){
+        portProxy = await vscode.window.showInputBox(cts.optInputPortProxy);
+        if(portProxy != null && portProxy.length > 0){
+          if(!isNaN(portProxy)){
+            if(proxyWithUser){
+              do
+                usernameProxy = await vscode.window.showInputBox(cts.optInputUsernameProxy);
+              while(usernameProxy == null && usernameProxy.length <= 0);
+  
+              do
+                passwordProxy = await vscode.window.showInputBox(cts.optInputPasswordProxy);
+              while(passwordProxy == null && passwordProxy.length <= 0);
+            }
+          }else{
+            vscode.window.showErrorMessage(`The port of proxy configuration is not a number.`);
+            return;
           }
-        });
-      }
-    });
-    if (nameProxy != null && hostProxy != null && portProxy != null){
-      proxyCommand = `grails add-proxy ${nameProxy} --host=${hostProxy} --port=${portProxy}`;
-      if(usernameProxy != null){
-        proxyCommand = proxyCommand.concat(`--username=${usernameProxy}`);
-        if(passwordProxy != null){
-          proxyCommand = proxyCommand.concat(`--password=${passwordProxy}`);
+        }else{
+          vscode.window.showErrorMessage(`The port of proxy configuration required.`);
+          return;
         }
+      }else{
+        vscode.window.showErrorMessage(`The hostname of proxy configuration required.`);
+        return;
       }
+    }else{
+      vscode.window.showErrorMessage(`The name of proxy configuration required.`);
+      return;
     }
+
+    proxyCommand = `grails add-proxy ${nameProxy} --host=${hostProxy} --port=${portProxy}`;
+
+    if(proxyWithUser){
+      proxyCommand = proxyCommand.concat(` --username=${usernameProxy} --password=${passwordProxy}`);
+    }
+
+    console.log(proxyCommand);
     grailsChannel.show();
     let promise = new Promise(resolve =>{
-      let result = cp.exec(proxyCommand,{cwd: getWorkspaceDir()});
+      let result = cp.exec(proxyCommand, {cwd: getWorkspaceDir()});
       result.stdout.on("data",(data)=>{
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
-      })
+      });
       resolve();
     });
     return promise;
@@ -233,7 +256,45 @@ function clearProxy(){
   }
 }
 
+async function removeProxy(){
+  if(!filterVersion(getGrailsVersion(),'remove-proxy')){
+    vscode.window.showErrorMessage(`The 'remove-proxy' method is deprecated.`);
+  }else{
+    let file = path.join(`${os.homedir()}/.grails`,'ProxySettings.groovy');
+    let data = fs.readFileSync(file,'utf-8');
+    let lines = data.split(/\r?\n/);
+    let proxyNamesCatcher;
+    let proxyNamesList = [];
+    lines.forEach((line, i) =>{
+      if(line.length > 0){
+        proxyNamesCatcher = line.match(/(^\w+)/gi);
+        proxyNamesList.push(proxyNamesCatcher);
+      }
+    });
+    let quickPick = await vscode.window.showQuickPick(proxyNamesList.toString().split(','),{
+      placeHolder: "Teste",
+    });
+    if(quickPick != null && quickPick.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Remove '${quickPick}' alias configuration proxy.`);
+        let result = cp.exec(`grails remove-proxy ${quickPick}`,{cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data) => {
+          outputFilter = data;
+          infoCatcher  = outputFilter.match(/\w.+/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  }
+}
+
 //Objects Creation Functions
+
 function createApp(){
   vscode.window.showOpenDialog(cts.optCreateApp).then(folder => {
     if(folder != null && folder.length > 0){
@@ -448,6 +509,7 @@ module.exports ={
   stopApp,
   addProxy,
   clearProxy,
+  removeProxy,
   createApp,  
   createDomainClass,
   createController,

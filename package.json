@@ -31,9 +31,19 @@
         "title": "Add Proxy Configurations"
       },
       {
+        "command": "gfvscode.addProxyWithUser",
+        "category": "Grails",
+        "title": "Add Proxy Configurations (With User & Password)"
+      },
+      {
         "command": "gfvscode.clearProxy",
         "category": "Grails",
         "title": "Clear Proxy Configurations"
+      },
+      {
+        "command": "gfvscode.removeProxy",
+        "category": "Grails",
+        "title": "Remove Proxy Configurations"
       },
       {
         "command": "gfvscode.createApp",

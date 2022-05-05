@@ -37,13 +37,25 @@ function activate(context) {
 
 		context.subscriptions.push(
 			vscode.commands.registerCommand('gfvscode.addProxy', function(){
-				functions.addProxy();
+				functions.addProxy(false);
+			})
+		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('gfvscode.addProxyWithUser', function(){
+				functions.addProxy(true);
 			})
 		);
 
 		context.subscriptions.push(
 			vscode.commands.registerCommand('gfvscode.clearProxy', function(){
 				functions.clearProxy();
+			})
+		);
+
+		context.subscriptions.push(
+			vscode.commands.registerCommand('gfvscode.removeProxy', function(){
+				functions.removeProxy();
 			})
 		);
 
