@@ -126,6 +126,12 @@ function filterVersion(version, resource){
     }else{
       result = true;
     }
+  }else if(resource == 'set-proxy'){
+    if(parseInt(version[0] > 3)){
+      result = false;
+    }else{
+      result = true;
+    }
   }
   return result;
 }
@@ -265,20 +271,63 @@ async function removeProxy(){
     let lines = data.split(/\r?\n/);
     let proxyNamesCatcher;
     let proxyNamesList = [];
-    lines.forEach((line, i) =>{
+    lines.forEach((line) =>{
       if(line.length > 0){
         proxyNamesCatcher = line.match(/(^\w+)/gi);
         proxyNamesList.push(proxyNamesCatcher);
       }
     });
     let quickPick = await vscode.window.showQuickPick(proxyNamesList.toString().split(','),{
-      placeHolder: "Teste",
+      placeHolder: "Choose the alias configuration proxy to remove.",
+    });
+    if(quickPick != null && quickPick.length > 0){
+      if(quickPick != 'currentProxy'){
+        grailsChannel.show();
+        let promise = new Promise(resolve =>{
+          vscode.window.showInformationMessage(`Remove '${quickPick}' alias configuration proxy.`);
+          let result = cp.exec(`grails remove-proxy ${quickPick}`,{cwd: getWorkspaceDir()});
+          result.stdout.on("data", (data) => {
+            outputFilter = data;
+            infoCatcher  = outputFilter.match(/\w.+/gi);
+            if(infoCatcher != null){
+              grailsChannel.append(`${infoCatcher[0]}\n`);
+            }
+            resolve();
+          });
+        });
+        return promise;
+      }else{
+        vscode.window.showWarningMessage(`To remove de currentProxy configuration, go to ProxySettings.groovy and delete the line of file and run this command again.`);
+      }
+    }
+  }
+}
+
+async function setProxy(){
+  if(!filterVersion(getGrailsVersion(),'set-proxy')){
+    vscode.window.showErrorMessage(`The 'set-proxy' method is deprecated.`);
+  }else{
+    let file = path.join(`${os.homedir()}/.grails`,'ProxySettings.groovy');
+    let data = fs.readFileSync(file,'utf-8');
+    let lines = data.split(/\r?\n/);
+    let proxyNamesCatcher;
+    let proxyNamesList = [];
+    lines.forEach((line) =>{
+      if(line.length > 0){
+        proxyNamesCatcher = line.match(/(^\w+)/gi);
+        if(line != 'currentProxy'){
+          proxyNamesList.push(proxyNamesCatcher);
+        }
+      }
+    });
+    let quickPick = await vscode.window.showQuickPick(proxyNamesList.toString().split(','),{
+      placeHolder: "Choose the alias configuration proxy to setup.",
     });
     if(quickPick != null && quickPick.length > 0){
       grailsChannel.show();
       let promise = new Promise(resolve =>{
-        vscode.window.showInformationMessage(`Remove '${quickPick}' alias configuration proxy.`);
-        let result = cp.exec(`grails remove-proxy ${quickPick}`,{cwd: getWorkspaceDir()});
+        vscode.window.showInformationMessage(`Set alias configuration proxy to '${quickPick}'.`);
+        let result = cp.exec(`grails set-proxy ${quickPick}`,{cwd: getWorkspaceDir()});
         result.stdout.on("data", (data) => {
           outputFilter = data;
           infoCatcher  = outputFilter.match(/\w.+/gi);
@@ -510,6 +559,7 @@ module.exports ={
   addProxy,
   clearProxy,
   removeProxy,
+  setProxy,
   createApp,  
   createDomainClass,
   createController,

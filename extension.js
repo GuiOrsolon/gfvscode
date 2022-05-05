@@ -60,6 +60,12 @@ function activate(context) {
 		);
 
 		context.subscriptions.push(
+			vscode.commands.registerCommand('gfvscode.setProxy', function(){
+				functions.setProxy();
+			})
+		);
+
+		context.subscriptions.push(
 			vscode.commands.registerCommand('gfvscode.createDomainClass', function(){
 				functions.createDomainClass();
 			})

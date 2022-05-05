@@ -28,22 +28,27 @@
       {
         "command": "gfvscode.addProxy",
         "category": "Grails",
-        "title": "Add Proxy Configurations"
+        "title": "Add Proxy Configuration"
       },
       {
         "command": "gfvscode.addProxyWithUser",
         "category": "Grails",
-        "title": "Add Proxy Configurations (With User & Password)"
+        "title": "Add Proxy Configuration (With User & Password)"
       },
       {
         "command": "gfvscode.clearProxy",
         "category": "Grails",
-        "title": "Clear Proxy Configurations"
+        "title": "Clear Proxy Configuration"
       },
       {
         "command": "gfvscode.removeProxy",
         "category": "Grails",
-        "title": "Remove Proxy Configurations"
+        "title": "Remove Proxy Configuration"
+      },
+      {
+        "command": "gfvscode.setProxy",
+        "category": "Grails",
+        "title": "Set Proxy Configuration"
       },
       {
         "command": "gfvscode.createApp",
