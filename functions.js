@@ -20,6 +20,7 @@ let stbarConfig      = [];
 
 let applicationName  = '';
 let grailsVersion    = '';
+let grailsCommand    = '';
 
 //Filters and Catchers
 
@@ -38,28 +39,37 @@ let usernameProxy    = '';
 let passwordProxy    = '';
 let proxyCommand     = '';
 
-//Helper functions
+//Utility functions
 
 function showGrailsChannel() {
   grailsChannel.show();
 }
 
 function getWorkspaceDir(){
-  return path.resolve(vscode.workspace.workspaceFolders[0].uri.fsPath);
+  try{
+    let result = path.resolve(vscode.workspace.workspaceFolders[0].uri.fsPath);
+    return result;
+  }catch(err){
+    return null;
+  }
 }
 
 function checkIfIsAGrailsProject(){
-  if(fs.existsSync(path.join(getWorkspaceDir(),'grailsw')))
-    return true;
-  else
-    return false;
+  if(getWorkspaceDir() != null){
+    if(fs.existsSync(path.join(getWorkspaceDir(),'grails-app')))
+      return true;
+    else
+      return false;
+  }else{
+    return null;
+  }
 }
 
 function defineAppProperties(){
   let properties  = pr(path.join(getWorkspaceDir(),'application.properties'));
   grailsVersion   = properties.get("app.grails.version");
   applicationName = properties.get("app.name");
-  vscode.window.showInformationMessage(`Grails Version Project detected: ${grailsVersion}`);
+  vscode.window.showInformationMessage(`Grails Version detected: ${grailsVersion}`);
 }
 
 function getGrailsVersion(){
@@ -182,6 +192,56 @@ function stopApp(){
       }
       resolve();
     });
+  });
+  return promise;
+}
+
+async function grailsRunCommand(){
+  grailsCommand = await vscode.window.showInputBox(cts.optInputGrailsCommand);
+  if(grailsCommand != null && grailsCommand.length > 0){
+    grailsChannel.show();
+    let promise = new Promise(resolve => {
+      let result = cp.exec(`grails ${grailsCommand}`, {cwd: getWorkspaceDir()});
+      result.stdout.on("data", (data)=>{
+        outputFilter = data;
+        infoCatcher  = outputFilter.match(/\w.+/gi);
+      });
+      resolve();
+    });
+    return promise;
+  }
+}
+
+function cleanProject(){
+  vscode.window.showInformationMessage(`Performing Project Cleaning...`);
+  grailsChannel.show();
+  let promise = new Promise(resolve =>{
+    let result = cp.exec(`grails clean`, {cwd: getWorkspaceDir()});
+    result.stdout.on("data", (data)=>{
+      outputFilter = data;
+      infoCatcher  = outputFilter.match(/\w.+/gi);
+      if(infoCatcher != null){
+        grailsChannel.append(`${infoCatcher[0]}\n`);
+      }
+    });
+    resolve();
+  });
+  return promise;
+}
+
+function compileProject(){
+  vscode.window.showInformationMessage(`Performing Project Compile...`);
+  grailsChannel.show();
+  let promise = new Promise(resolve =>{
+    let result = cp.exec(`grails compile`,{cwd: getWorkspaceDir()});
+    result.stdout.on("data",(data)=>{
+      outputFilter = data;
+      infoCatcher  = outputFilter.match(/\w.+/gi);
+      if(infoCatcher != null){
+        grailsChannel.append(`${infoCatcher[0]}\n`);
+      }
+    });
+    resolve();
   });
   return promise;
 }
@@ -377,6 +437,37 @@ function createApp(){
   });
 }
 
+function createPlugin(){
+  vscode.window.showOpenDialog(cts.optCreatePlugin).then(folder =>{
+    if(folder != null && folder.length > 0){
+      vscode.window.showInputBox(cts.optInputPluginName).then(pluginName =>{
+        if(pluginName != null && pluginName.length > 0){
+          grailsChannel.show();
+          let promise = new Promise(resolve =>{
+            vscode.window.showInformationMessage(`Creating Plugin '${pluginName}'...`);
+            let result = cp.exec(`grails create-plugin ${pluginName}`, {cwd: folder[0].fsPath});
+            result.stdout.on("data", (data) => {
+              outputFilter = data;
+              infoCatcher  = outputFilter.match(/\w.+/gi);
+              createCatcher = outputFilter.match(/Created plugin/gi);
+              if(infoCatcher != null){
+                grailsChannel.append(`${infoCatcher[0]}\n`);
+                if(createCatcher != null){
+                  let terminal = vscode.window.createTerminal({cwd: folder[0].fsPath});
+                  terminal.sendText(`code -r ${pluginName}`);
+                  terminal.dispose;
+                }
+              }
+              resolve();
+            });
+          });
+          return promise;
+        }
+      });
+    }
+  });
+}
+
 function createDomainClass(){
   vscode.window.showInputBox(cts.optInputDomainName).then(domainName =>{
     if(domainName != null && domainName.length > 0){
@@ -556,11 +647,15 @@ module.exports ={
   filterVersion,
   runApp,
   stopApp,
+  grailsRunCommand,
+  cleanProject,
+  compileProject,
   addProxy,
   clearProxy,
   removeProxy,
   setProxy,
   createApp,  
+  createPlugin,
   createDomainClass,
   createController,
   createService,

@@ -26,6 +26,21 @@
         "title": "Stop App"
       },
       {
+        "command": "gfvscode.runCommand",
+        "category": "Grails",
+        "title": "Run Command"
+      },
+      {
+        "command": "gfvscode.cleanProject",
+        "category": "Grails",
+        "title": "Clean Project"
+      },
+      {
+        "command": "gfvscode.compile",
+        "category": "Grails",
+        "title": "Compile Project"
+      },
+      {
         "command": "gfvscode.addProxy",
         "category": "Grails",
         "title": "Add Proxy Configuration"
@@ -54,6 +69,11 @@
         "command": "gfvscode.createApp",
         "category": "Grails",
         "title": "Create App"
+      },      
+      {
+        "command": "gfvscode.createPlugin",
+        "category": "Grails",
+        "title": "Create Plugin"
       },      
       {
         "command": "gfvscode.createDomainClass",
