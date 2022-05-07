@@ -14,6 +14,9 @@ const optInputPortProxy       = { placeHolder: "Port (required, only numbers)"	,
 const optInputUsernameProxy   = { placeHolder: "Username (optional)"	, prompt: "Please, enter the Username proxy if exists." };
 const optInputPasswordProxy   = { placeHolder: "Password (optional)"	, prompt: "Please, enter the Password proxy if exists.", password: true };
 const optInputGrailsCommand   = { placeHolder: "Grails Command"	, prompt: "Please, enter a command for grails."};
+const optInputScriptName      = { placeHolder: "Script Name"	, prompt: "Please, enter a script name."};
+const optInputTaglibName      = { placeHolder: "Taglib Name"	, prompt: "Please, enter a Tablib name."};
+const optInputUnitTestName    = { placeHolder: "Unit Test Name"	, prompt: "Please, enter a Unit Test name."};
 
 module.exports = {
   optCreateApp,
@@ -30,5 +33,8 @@ module.exports = {
   optInputPortProxy,
   optInputUsernameProxy,
   optInputPasswordProxy,
-  optInputGrailsCommand
+  optInputGrailsCommand,
+  optInputScriptName,
+  optInputTaglibName,
+  optInputUnitTestName
 }

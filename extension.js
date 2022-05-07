@@ -47,6 +47,24 @@ function activate(context) {
 	);
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.dependencyReport', function(){
+			functions.showDependencyReport();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.help', function(){
+			functions.showHelp();
+		})
+	);	
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.listPlugins', function(){
+			functions.listPlugins();
+		})
+	);	
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.addProxy', function(){
 			functions.addProxy(false);
 		})
@@ -109,6 +127,24 @@ function activate(context) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.createHibernateCfg', function(){
 			functions.createHibernateCfgXML();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createScript', function(){
+			functions.createScript();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createTaglib', function(){
+			functions.createTagLib();
+		})
+	);
+	
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createUnitTest', function(){
+			functions.createUnitTest();
 		})
 	);
 

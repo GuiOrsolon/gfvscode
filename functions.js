@@ -246,6 +246,105 @@ function compileProject(){
   return promise;
 }
 
+async function showDependencyReport(){
+  await vscode.window.showInformationMessage(`Show Grails Dependency Report in Terminal or Save a Text File?`,'Terminal','Text File').then(selection =>{
+    if(selection === 'Terminal'){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails dependency-report`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          grailsChannel.append(`${data}\n`);
+          resolve();
+        });
+        result.stdout.on("end", () =>{
+          grailsChannel.append(`Done!`);
+        });
+      });
+      return promise;
+    }else{
+      grailsChannel.show();
+      grailsChannel.append(`Generating Text File of Grails Dependency Report...`);
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails dependency-report > dependency-report.txt`,{cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          grailsChannel.append(`${data}`);
+          resolve();
+        });
+        result.stdout.on("end", ()=>{
+          grailsChannel.append(`Done!`);
+        });
+      });
+      return promise;
+    }
+  });
+}
+
+async function showHelp(){
+  await vscode.window.showInformationMessage(`Show Grails Help in Terminal or Save a Text File?`,'Terminal','Text File').then(selection =>{
+    if(selection === 'Terminal'){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails help`, {cwd:getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          grailsChannel.append(`${data}\n`);
+          resolve();
+        });
+        result.stdout.on("end", ()=>{
+          grailsChannel.appendLine(`Done!`);
+        });
+      });
+      return promise;
+    }else{
+      grailsChannel.show();
+      grailsChannel.append(`Generating Text File of Grails Help...`);
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails help > grails-help.txt`,{cwd:getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          grailsChannel.append(`${data}`);
+          resolve();
+        });
+        result.stdout.on("end", ()=>{
+          grailsChannel.append(`Done!`);
+        });
+      });
+      return promise;
+    }
+  });
+}
+
+async function listPlugins(){
+  await vscode.window.showInformationMessage(`Show Grails List Plugins in Terminal or Save a Text File?`,'Terminal','Text File').then(selection =>{
+    if(selection === 'Terminal'){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails list-plugins`,{cwd:getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          grailsChannel.append(`${data}\n`);
+          resolve();
+        });
+        result.stdout.on("end",()=>{
+          grailsChannel.appendLine(`Done!`);
+        });
+      });
+      return promise;
+    }else{
+      grailsChannel.show();
+      grailsChannel.append(`Generating Text File of Grails List Plugins...`);
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails list-plugins > grails-list-plugins.txt`,{cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          grailsChannel.append(`${data}`);
+          resolve();
+        })
+        result.stdout.on("end", ()=>{
+          grailsChannel.append(`Done!`);
+        });
+      });
+      return promise;
+    }
+  });
+}
+
 //Configuration functios
 
 async function addProxy(proxyWithUser){
@@ -636,6 +735,87 @@ function createHibernateCfgXML(){
   }
 }
 
+function createScript(){
+  vscode.window.showInputBox(cts.optInputScriptName).then(scriptName =>{
+    if(scriptName != null && scriptName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${scriptName}' Script...`);
+        let result = cp.exec(`grails create-script ${scriptName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data) =>{
+          outputFilter  = data;
+          infoCatcher   = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created file scripts/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Script '${scriptName}.groovy' was created.`);
+            }
+          } 
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
+
+function createTagLib(){
+  vscode.window.showInputBox(cts.optInputTagLibName).then(tagLibName =>{
+    if(tagLibName != null && tagLibName.length > 0){
+      grailsChannel.show();
+      let command = '';
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${tagLibName}' Taglib...`);
+        if(parseInt(grailsVersion[0]) < 3){
+          command = `grails create-tag-lib ${tagLibName}`;
+        }else{
+          command = `grails create-taglib ${tagLibName}`;
+        }
+        let result = cp.exec(command,{cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          outputFilter  = data;
+          infoCatcher   = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created grails-app/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Taglib '${tagLibName}TagLib.groovy' was created.`);
+            }
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
+
+function createUnitTest(){
+  vscode.window.showInputBox(cts.optInputUnitTestName).then(unitTestName =>{
+    if(unitTestName != null && unitTestName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${unitTestName}' Unit Test...`);
+        let result = cp.exec(`grails create-unit-test ${unitTestName}`,{cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          outputFilter  = data;
+          infoCatcher   = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created file test/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Unit Test '${unitTestName}Spec.groovy' was created.`);
+            }
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
@@ -650,6 +830,9 @@ module.exports ={
   grailsRunCommand,
   cleanProject,
   compileProject,
+  showDependencyReport,
+  showHelp,
+  listPlugins,
   addProxy,
   clearProxy,
   removeProxy,
@@ -661,5 +844,8 @@ module.exports ={
   createService,
   createFilter,
   createInterceptor,
-  createHibernateCfgXML
+  createHibernateCfgXML,
+  createScript,
+  createTagLib,
+  createUnitTest
 }

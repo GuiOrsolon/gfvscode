@@ -41,6 +41,21 @@
         "title": "Compile Project"
       },
       {
+        "command": "gfvscode.dependencyReport",
+        "category": "Grails",
+        "title": "Grails Dependency Report"
+      },
+      {
+        "command": "gfvscode.help",
+        "category": "Grails",
+        "title": "Grails Help"
+      },
+      {
+        "command": "gfvscode.listPlugins",
+        "category": "Grails",
+        "title": "List Plugins"
+      },
+      {
         "command": "gfvscode.addProxy",
         "category": "Grails",
         "title": "Add Proxy Configuration"
@@ -104,6 +119,21 @@
         "command": "gfvscode.createHibernateCfg",
         "category": "Grails",
         "title": "Create Hibernate Configuration File XML"
+      },
+      {
+        "command": "gfvscode.createScript",
+        "category": "Grails",
+        "title": "Create Script"
+      },
+      {
+        "command": "gfvscode.createTaglib",
+        "category": "Grails",
+        "title": "Create Taglib"
+      },
+      {
+        "command": "gfvscode.createUnitTest",
+        "category": "Grails",
+        "title": "Create Unit Test"
       },
       {
         "command": "gfvscode.test",
