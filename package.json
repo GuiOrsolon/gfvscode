@@ -56,6 +56,16 @@
         "title": "List Plugins"
       },
       {
+        "command": "gfvscode.console",
+        "category": "Grails",
+        "title": "Console"
+      },
+      {
+        "command": "gfvscode.stats",
+        "category": "Grails",
+        "title": "Stats"
+      },
+      {
         "command": "gfvscode.addProxy",
         "category": "Grails",
         "title": "Add Proxy Configuration"

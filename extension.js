@@ -65,6 +65,18 @@ function activate(context) {
 	);	
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.console', function(){
+			functions.showConsole();
+		})
+	);	
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.stats', function(){
+			functions.showStats();
+		})
+	);	
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.addProxy', function(){
 			functions.addProxy(false);
 		})

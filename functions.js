@@ -345,6 +345,54 @@ async function listPlugins(){
   });
 }
 
+function showConsole(){
+  grailsChannel.show();
+  let promise = new Promise(resolve =>{
+    let result = cp.exec(`grails console`, {cwd: getWorkspaceDir()});
+    result.stdout.on("data",(data)=>{
+      grailsChannel.append(`${data}`);
+      resolve();
+    });
+    result.stdout.on("end", ()=>{
+      grailsChannel.appendLine(`Done!`);
+    });
+  });
+  return promise;
+}
+
+async function showStats(){
+  await vscode.window.showInformationMessage(`Show Grails Stats in Terminal or Save a Text File?`,'Terminal','Text File').then(selection =>{
+    if(selection === 'Terminal'){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails stats`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          grailsChannel.append(`${data}`);
+          resolve();
+        });
+        result.stdout.on("end", ()=>{
+          grailsChannel.appendLine(`Done!`);
+        })
+      });
+      return promise;
+    }else{
+      grailsChannel.show();
+      grailsChannel.append(`Generating Text File of Grails Stats...`);
+      let promise = new Promise(resolve =>{
+        let result = cp.exec(`grails stats > grails-stats.txt`,{cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          grailsChannel.append(`${data}`);
+          resolve();
+        });
+        result.stdout.on("end", ()=>{
+          grailsChannel.append(`Done!`);
+        });
+      });
+      return promise;
+    }
+  });
+}
+
 //Configuration functios
 
 async function addProxy(proxyWithUser){
@@ -833,6 +881,8 @@ module.exports ={
   showDependencyReport,
   showHelp,
   listPlugins,
+  showConsole,
+  showStats,
   addProxy,
   clearProxy,
   removeProxy,
