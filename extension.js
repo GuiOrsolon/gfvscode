@@ -77,6 +77,18 @@ function activate(context) {
 	);	
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.generateDoc', function(){
+			functions.generateDoc();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createWar', function(){
+			functions.createWar();
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.addProxy', function(){
 			functions.addProxy(false);
 		})

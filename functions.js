@@ -142,6 +142,12 @@ function filterVersion(version, resource){
     }else{
       result = true;
     }
+  }else if(resource == 'generate-doc'){
+    if(parseInt(version[0] > 3)){
+      result = false;
+    }else{
+      result = true;
+    }
   }
   return result;
 }
@@ -393,6 +399,48 @@ async function showStats(){
   });
 }
 
+function generateDoc(){
+  let command = '';
+  if(filterVersion(getGrailsVersion(),'generate-doc')){
+    command = `grails doc`;
+  }else{
+    command = `grails docs`;
+  }
+  vscode.window.showInformationMessage(`Generating documentation os project...`);
+  grailsChannel.show();
+  let promise = new Promise(resolve => {
+    let result = cp.exec(`${command}`, {cwd: getWorkspaceDir()});
+    result.stdout.on("data",(data)=>{
+      grailsChannel.append(`${data}`);
+      resolve();
+    });
+    result.stdout.on("end", ()=>{
+      grailsChannel.append(`Done!`);
+    });
+  });
+  return promise;
+}
+
+function createWar(){
+  vscode.window.showInformationMessage(`Generating WAR of Project...`);
+  grailsChannel.show();
+  let promise = new Promise(resolve =>{
+    let result = cp.exec(`grails war`,{cwd: getWorkspaceDir()});
+    result.stdout.on("data",(data)=>{
+      outputFilter = data;
+      infoCatcher  = outputFilter.match(/\w.+/gi);
+      if(infoCatcher != null){
+        grailsChannel.append(`${infoCatcher[0]}\n`);
+      }
+      resolve();
+    });
+    result.stdout.on("end", ()=>{
+      grailsChannel.append(`Done!`);
+    });
+  });
+  return promise;
+}
+
 //Configuration functios
 
 async function addProxy(proxyWithUser){
@@ -438,7 +486,6 @@ async function addProxy(proxyWithUser){
       proxyCommand = proxyCommand.concat(` --username=${usernameProxy} --password=${passwordProxy}`);
     }
 
-    console.log(proxyCommand);
     grailsChannel.show();
     let promise = new Promise(resolve =>{
       let result = cp.exec(proxyCommand, {cwd: getWorkspaceDir()});
@@ -883,6 +930,8 @@ module.exports ={
   listPlugins,
   showConsole,
   showStats,
+  generateDoc,
+  createWar,
   addProxy,
   clearProxy,
   removeProxy,

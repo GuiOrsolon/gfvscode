@@ -66,6 +66,16 @@
         "title": "Stats"
       },
       {
+        "command": "gfvscode.generateDoc",
+        "category": "Grails",
+        "title": "Generate Documentation"
+      },
+      {
+        "command": "gfvscode.createWar",
+        "category": "Grails",
+        "title": "Generate WAR"
+      },
+      {
         "command": "gfvscode.addProxy",
         "category": "Grails",
         "title": "Add Proxy Configuration"
