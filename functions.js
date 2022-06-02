@@ -148,6 +148,18 @@ function filterVersion(version, resource){
     }else{
       result = true;
     }
+  }else if(resource == 'migrate-docs'){
+    if(parseInt(version[0] > 3)){
+      result = false;
+    }else{
+      result = true;
+    }
+  }else if(resource == 'create-pom'){
+    if(parseInt(version[0] > 3)){
+      result = false;
+    }else{
+      result = true;
+    }
   }
   return result;
 }
@@ -441,7 +453,30 @@ function createWar(){
   return promise;
 }
 
-//Configuration functios
+function migrateDocs(){
+  if(!filterVersion(getGrailsVersion(),'migrate-docs')){
+    vscode.window.showErrorMessage(`The 'migrate-docs' method is deprecated.`);
+  }else{
+    grailsChannel.show();
+    let promise = new Promise(resolve =>{
+      let result = cp.exec(`grails migrate-docs`,{cwd: getWorkspaceDir()});
+      result.stdout.on("data",(data)=>{
+        outputFilter = data;
+        infoCatcher  = outputFilter.match(/\w.+/gi);
+        if(infoCatcher != null){
+          grailsChannel.append(`${infoCatcher[0]}\n`);
+        }
+      });
+      result.stdout.on("end", ()=>{
+        grailsChannel.append(`Done!`);
+      });
+      resolve()
+    });
+    return promise;
+  }
+}
+
+//Configuration functions
 
 async function addProxy(proxyWithUser){
   if(!filterVersion(getGrailsVersion(),'add-proxy')){
@@ -911,6 +946,135 @@ function createUnitTest(){
   });
 }
 
+function createIntegrationTest(){
+  vscode.window.showInputBox(cts.optInputIntegrationTestName).then(integrationTestName =>{
+    if(integrationTestName != null && integrationTestName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Creating '${integrationTestName}' Integration Test...`);
+        let result = cp.exec(`grails create-integration-test ${integrationTestName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          outputFilter = data;
+          infoCatcher  = outputFilter.match(/\w.+/gi);
+          createCatcher = outputFilter.match(/Created file test/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+            if(createCatcher != null){
+              vscode.window.showInformationMessage(`Integration Test '${integrationTestName}IntegrationSpec.groovy' was created.`);
+            }
+          }
+          resolve();
+        });
+      });
+      return promise;
+    }
+  });
+}
+
+function createPOM(){
+  if(!filterVersion(getGrailsVersion(),'create-pom')){
+    vscode.window.showErrorMessage(`The 'create-pom' method is deprecated.`);
+  }else{
+    vscode.window.showInputBox(cts.optInputPomGroupId).then(groupIdName =>{
+      if(groupIdName != null && groupIdName.length > 0){
+        grailsChannel.show();
+        let promise = new Promise(resolve =>{
+          vscode.window.showInformationMessage(`Creating POM.xml with '${groupIdName}' group id...`);
+          let result = cp.exec(`grails create-pom ${groupIdName}`, {cwd: getWorkspaceDir()});
+          result.stdout.on("data",(data)=>{
+            outputFilter = data;
+            infoCatcher  = outputFilter.match(/\w.+/gi);
+            createCatcher = outputFilter.match(/POM generated/gi);
+            if(infoCatcher != null){
+              grailsChannel.append(`${infoCatcher[0]}\n`);
+              if(createCatcher != null){
+                vscode.window.showInformationMessage(`The POM.xml file was created.`);
+              }
+            }
+            resolve();
+          });
+        });
+        return promise;
+      }
+    });
+  }
+}
+
+//Generates
+function generateViews(){
+  vscode.window.showInputBox(cts.optInputGenerateViews).then(generateName=>{
+    if(generateName != null && generateName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Generate Views...`);
+        let result = cp.exec(`grails generate-views ${generateName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          outputFilter = data;
+          infoCatcher  = outputFilter.match(/\w.+/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+          }
+        });
+        result.stdout.on("end",()=>{
+          grailsChannel.append(`Done!`);
+        });
+        resolve();
+      });
+      return promise;
+    }
+  });
+}
+
+function generateControllers(){
+  vscode.window.showInputBox(cts.optInputGenerateControllers).then(generateName=>{
+    if(generateName != null && generateName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Generate Controllers...`);
+        let result = cp.exec(`grails generate-controller ${generateName}`, {cwd: getWorkspaceDir()});
+        result.stdout.on("data",(data)=>{
+          outputFilter = data;
+          infoCatcher  = outputFilter.match(/\w.+/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+          }
+        });
+        result.stdout.on("end",()=>{
+          grailsChannel.append(`Done!`);
+        });
+        resolve();
+      });
+      return promise;
+    }
+  });
+}
+
+function generateAll(){
+  vscode.window.showInputBox(cts.optInputGenerateAll).then(generateName=>{
+    if(generateName != null && generateName.length > 0){
+      grailsChannel.show();
+      let promise = new Promise(resolve =>{
+        vscode.window.showInformationMessage(`Generate Views and Controllers...`);
+        let result = cp.exec(`grails generate-all ${generateName}`,{cwd: getWorkspaceDir()});
+        result.stdout.on("data", (data)=>{
+          outputFilter = data;
+          infoCatcher  = outputFilter.match(/\w.+/gi);
+          if(infoCatcher != null){
+            grailsChannel.append(`${infoCatcher[0]}\n`);
+          }
+        });
+        result.stdout.on("end",()=>{
+          grailsChannel.append(`Done!`);
+        });
+        resolve();
+      });
+      return promise;
+    }
+  });
+}
+
+
+
 module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
@@ -931,6 +1095,7 @@ module.exports ={
   showConsole,
   showStats,
   generateDoc,
+  migrateDocs,
   createWar,
   addProxy,
   clearProxy,
@@ -946,5 +1111,10 @@ module.exports ={
   createHibernateCfgXML,
   createScript,
   createTagLib,
-  createUnitTest
+  createUnitTest,
+  createIntegrationTest,
+  createPOM,
+  generateViews,
+  generateControllers,
+  generateAll
 }

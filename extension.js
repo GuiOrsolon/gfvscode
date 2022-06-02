@@ -83,6 +83,12 @@ function activate(context) {
 	);
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.migrateDocs', function(){
+			functions.migrateDocs();
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.createWar', function(){
 			functions.createWar();
 		})
@@ -169,6 +175,36 @@ function activate(context) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.createUnitTest', function(){
 			functions.createUnitTest();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createIntegrationTest', function(){
+			functions.createIntegrationTest();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.createPOM', function(){
+			functions.createPOM();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.generateViews', function(){
+			functions.generateViews();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.generateControllers', function(){
+			functions.generateControllers();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.generateAll', function(){
+			functions.generateAll();
 		})
 	);
 

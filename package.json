@@ -76,6 +76,11 @@
         "title": "Generate WAR"
       },
       {
+        "command": "gfvscode.migrateDocs",
+        "category": "Grails",
+        "title": "Migrate Docs"
+      },
+      {
         "command": "gfvscode.addProxy",
         "category": "Grails",
         "title": "Add Proxy Configuration"
@@ -154,6 +159,31 @@
         "command": "gfvscode.createUnitTest",
         "category": "Grails",
         "title": "Create Unit Test"
+      },
+      {
+        "command": "gfvscode.createIntegrationTest",
+        "category": "Grails",
+        "title": "Create Integration Test"
+      },
+      {
+        "command": "gfvscode.createPOM",
+        "category": "Grails",
+        "title": "Create POM XML"
+      },
+      {
+        "command": "gfvscode.generateViews",
+        "category": "Grails",
+        "title": "Generate Views"
+      },
+      {
+        "command": "gfvscode.generateControllers",
+        "category": "Grails",
+        "title": "Generate Controllers"
+      },
+      {
+        "command": "gfvscode.generateAll",
+        "category": "Grails",
+        "title": "Generate All (Views and Controllers)"
       },
       {
         "command": "gfvscode.test",
