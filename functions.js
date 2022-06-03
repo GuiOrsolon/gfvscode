@@ -41,11 +41,6 @@ let passwordProxy    = '';
 let proxyCommand     = '';
 
 //Utility functions
-
-function showGrailsChannel() {
-  grailsChannel.show();
-}
-
 function getWorkspaceDir(){
   try{
     let result = path.resolve(vscode.workspace.workspaceFolders[0].uri.fsPath);
@@ -126,49 +121,49 @@ function filterVersion(version, resource){
       result = true;
     }
   }else if(resource == 'create-interceptor'){
-    if(parseInt(version[0] > 3)){
+    if(parseInt(version[0] >= 3)){
       result = true;
     }else{
       result = false;
     }
   }else if(resource == 'add-proxy'){
-    if(parseInt(version[0]) > 3){
+    if(parseInt(version[0]) >= 3){
       result = false;
     }else{
       result = true;
     }
   }else if(resource == 'clear-proxy'){
-    if(parseInt(version[0]) > 3){
+    if(parseInt(version[0]) >= 3){
       result = false;
     }else{
       result = true;
     }
   }else if(resource == 'remove-proxy'){
-    if(parseInt(version[0] > 3)){
+    if(parseInt(version[0] >= 3)){
       result = false;
     }else{
       result = true;
     }
   }else if(resource == 'set-proxy'){
-    if(parseInt(version[0] > 3)){
+    if(parseInt(version[0] >= 3)){
       result = false;
     }else{
       result = true;
     }
   }else if(resource == 'generate-doc'){
-    if(parseInt(version[0] > 3)){
+    if(parseInt(version[0] >= 3)){
       result = false;
     }else{
       result = true;
     }
   }else if(resource == 'migrate-docs'){
-    if(parseInt(version[0] > 3)){
+    if(parseInt(version[0] >= 3)){
       result = false;
     }else{
       result = true;
     }
   }else if(resource == 'create-pom'){
-    if(parseInt(version[0] > 3)){
+    if(parseInt(version[0] >= 3)){
       result = false;
     }else{
       result = true;
@@ -191,7 +186,7 @@ function runApp(){
       infoCatcher  = outputFilter.match(/\w.+/gi);
       urlCatcher   = outputFilter.match(/(http|https)?:\/\/.+/gi);
       if(infoCatcher != null){
-        grailsChannel.append(`${infoCatcher[0]}\n`);
+        grailsChannel.appendLine(`${infoCatcher[0]}`);
         if(urlCatcher != null){
           setStatusBarItem('running');
           vscode.env.openExternal(vscode.Uri.parse(urlCatcher[0]));
@@ -215,7 +210,7 @@ function stopApp(){
       infoCatcher  = outputFilter.match(/\w.+/gi);
       stopCatcher  = outputFilter.match(/Server Stopped/gi);
       if(infoCatcher != null){
-        grailsChannel.append(`${infoCatcher[0]}\n`);
+        grailsChannel.appendLine(`${infoCatcher[0]}`);
         if(stopCatcher != null){
           setStatusBarItem('stopped');
           vscode.window.showInformationMessage(`Grails Application '${applicationName}' was stopped.`);
@@ -236,6 +231,9 @@ async function grailsRunCommand(){
       result.stdout.on("data", (data)=>{
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
+        if(infoCatcher != null){
+          grailsChannel.appendLine(`${infoCatcher[0]}`);
+        }
       });
       resolve();
     });
@@ -252,7 +250,7 @@ function cleanProject(){
       outputFilter = data;
       infoCatcher  = outputFilter.match(/\w.+/gi);
       if(infoCatcher != null){
-        grailsChannel.append(`${infoCatcher[0]}\n`);
+        grailsChannel.appendLine(`${infoCatcher[0]}`);
       }
     });
     resolve();
@@ -269,7 +267,7 @@ function compileProject(){
       outputFilter = data;
       infoCatcher  = outputFilter.match(/\w.+/gi);
       if(infoCatcher != null){
-        grailsChannel.append(`${infoCatcher[0]}\n`);
+        grailsChannel.appendLine(`${infoCatcher[0]}`);
       }
     });
     resolve();
@@ -284,11 +282,11 @@ async function showDependencyReport(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails dependency-report`, {cwd: getWorkspaceDir()});
         result.stdout.on("data", (data)=>{
-          grailsChannel.append(`${data}\n`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end", () =>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
       });
       return promise;
@@ -298,11 +296,11 @@ async function showDependencyReport(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails dependency-report > dependency-report.txt`,{cwd: getWorkspaceDir()});
         result.stdout.on("data", (data)=>{
-          grailsChannel.append(`${data}`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end", ()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
       });
       return promise;
@@ -317,7 +315,7 @@ async function showHelp(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails help`, {cwd:getWorkspaceDir()});
         result.stdout.on("data", (data)=>{
-          grailsChannel.append(`${data}\n`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end", ()=>{
@@ -331,11 +329,11 @@ async function showHelp(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails help > grails-help.txt`,{cwd:getWorkspaceDir()});
         result.stdout.on("data", (data)=>{
-          grailsChannel.append(`${data}`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end", ()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
       });
       return promise;
@@ -350,7 +348,7 @@ async function listPlugins(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails list-plugins`,{cwd:getWorkspaceDir()});
         result.stdout.on("data",(data)=>{
-          grailsChannel.append(`${data}\n`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end",()=>{
@@ -364,11 +362,11 @@ async function listPlugins(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails list-plugins > grails-list-plugins.txt`,{cwd: getWorkspaceDir()});
         result.stdout.on("data",(data)=>{
-          grailsChannel.append(`${data}`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         })
         result.stdout.on("end", ()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
       });
       return promise;
@@ -381,7 +379,7 @@ function showConsole(){
   let promise = new Promise(resolve =>{
     let result = cp.exec(`grails console`, {cwd: getWorkspaceDir()});
     result.stdout.on("data",(data)=>{
-      grailsChannel.append(`${data}`);
+      grailsChannel.appendLine(`${data}`);
       resolve();
     });
     result.stdout.on("end", ()=>{
@@ -398,7 +396,7 @@ async function showStats(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails stats`, {cwd: getWorkspaceDir()});
         result.stdout.on("data",(data)=>{
-          grailsChannel.append(`${data}`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end", ()=>{
@@ -412,11 +410,11 @@ async function showStats(){
       let promise = new Promise(resolve =>{
         let result = cp.exec(`grails stats > grails-stats.txt`,{cwd: getWorkspaceDir()});
         result.stdout.on("data",(data)=>{
-          grailsChannel.append(`${data}`);
+          grailsChannel.appendLine(`${data}`);
           resolve();
         });
         result.stdout.on("end", ()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
       });
       return promise;
@@ -436,10 +434,10 @@ function generateDoc(){
   let promise = new Promise(resolve => {
     let result = cp.exec(`${command}`, {cwd: getWorkspaceDir()});
     result.stdout.on("data",(data)=>{
-      grailsChannel.append(`${data}`);
+      grailsChannel.appendLine(`${data}`);
     });
     result.stdout.on("end", ()=>{
-      grailsChannel.append(`Done!`);
+      grailsChannel.appendLine(`Done!`);
     });
     resolve();
   });
@@ -455,11 +453,11 @@ function createWar(){
       outputFilter = data;
       infoCatcher  = outputFilter.match(/\w.+/gi);
       if(infoCatcher != null){
-        grailsChannel.append(`${infoCatcher[0]}\n`);
+        grailsChannel.appendLine(`${infoCatcher[0]}`);
       }
     });
     result.stdout.on("end", ()=>{
-      grailsChannel.append(`Done!`);
+      grailsChannel.appendLine(`Done!`);
     });
     resolve();
   });
@@ -477,11 +475,11 @@ function packagePlugin(){
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
         if(infoCatcher != null){
-          grailsChannel.append(`${infoCatcher[0]}\n`);
+          grailsChannel.appendLine(`${infoCatcher[0]}`);
         }
       });
       result.stdout.on("end",()=>{
-        grailsChannel.append(`Done!`);
+        grailsChannel.appendLine(`Done!`);
       });
       resolve();
     });
@@ -500,11 +498,11 @@ function mavenInstall(){
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
         if(infoCatcher != null){
-          grailsChannel.append(`${infoCatcher[0]}\n`);
+          grailsChannel.appendLine(`${infoCatcher[0]}`);
         }
       });
       result.stdout.on("end",()=>{
-        grailsChannel.append(`Done!`);
+        grailsChannel.appendLine(`Done!`);
       });
       resolve();
     });
@@ -523,11 +521,11 @@ function migrateDocs(){
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
         if(infoCatcher != null){
-          grailsChannel.append(`${infoCatcher[0]}\n`);
+          grailsChannel.appendLine(`${infoCatcher[0]}`);
         }
       });
       result.stdout.on("end", ()=>{
-        grailsChannel.append(`Done!`);
+        grailsChannel.appendLine(`Done!`);
       });
       resolve()
     });
@@ -586,6 +584,9 @@ async function addProxy(proxyWithUser){
       result.stdout.on("data",(data)=>{
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
+        if(infoCatcher != null){
+          grailsChannel.appendLine(`${infoCatcher[0]}`);
+        }
       });
       resolve();
     });
@@ -603,6 +604,9 @@ function clearProxy(){
       result.stdout.on("data", (data)=>{
         outputFilter = data;
         infoCatcher  = outputFilter.match(/\w.+/gi);
+        if(infoCatcher != null){
+          grailsChannel.appendLine(`${infoCatcher[0]}`);
+        }
       });
       resolve();
     });
@@ -638,7 +642,7 @@ async function removeProxy(){
             outputFilter = data;
             infoCatcher  = outputFilter.match(/\w.+/gi);
             if(infoCatcher != null){
-              grailsChannel.append(`${infoCatcher[0]}\n`);
+              grailsChannel.appendLine(`${infoCatcher[0]}`);
             }
             resolve();
           });
@@ -680,7 +684,7 @@ async function setProxy(){
           outputFilter = data;
           infoCatcher  = outputFilter.match(/\w.+/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
           }
           resolve();
         });
@@ -707,7 +711,7 @@ function createApp(){
               infoCatcher   = outputFilter.match(/\w.+/gi);
               createCatcher = outputFilter.match(/Created Grails Application/gi);
               if(infoCatcher != null){
-                grailsChannel.append(`${infoCatcher[0]}\n`);
+                grailsChannel.appendLine(`${infoCatcher[0]}`);
                 if(createCatcher != null){
                   let terminal = vscode.window.createTerminal({cwd: folder[0].fsPath});
                   terminal.sendText(`code -r ${appName}`);
@@ -739,7 +743,7 @@ function createPlugin(){
               infoCatcher  = outputFilter.match(/\w.+/gi);
               createCatcher = outputFilter.match(/Created plugin/gi);
               if(infoCatcher != null){
-                grailsChannel.append(`${infoCatcher[0]}\n`);
+                grailsChannel.appendLine(`${infoCatcher[0]}`);
                 if(createCatcher != null){
                   let terminal = vscode.window.createTerminal({cwd: folder[0].fsPath});
                   terminal.sendText(`code -r ${pluginName}`);
@@ -768,7 +772,7 @@ function createDomainClass(){
           infoCatcher   = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created file grails-app/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Domain Class '${domainName}' was created.`);
             }
@@ -793,7 +797,7 @@ function createController(){
           infoCatcher   = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created file grails-app\/controllers/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Controller '${controllerName}Controller' was created.`);
             }
@@ -818,7 +822,7 @@ function createService(){
           infoCatcher  = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created file grails-app\/services/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Service '${serviceName}Service' was created.`);
             }
@@ -846,7 +850,7 @@ function createFilter(){
             infoCatcher  = outputFilter.match(/\w.+/gi);
             createCatcher = outputFilter.match(/Created file grails-app\/conf/gi);
             if(infoCatcher != null){
-              grailsChannel.append(`${infoCatcher[0]}\n`);
+              grailsChannel.appendLine(`${infoCatcher[0]}`);
               if(createCatcher != null){
                 vscode.window.showInformationMessage(`Filter '${filterName}' was created.`);
               }
@@ -873,10 +877,9 @@ function createInterceptor(){
           result.stdout.on("data", (data)=>{
             outputFilter = data;
             infoCatcher  = outputFilter.match(/\w.+/gi);
-            //revisar
             createCatcher = outputFilter.match(/Created file grails-app/gi);
             if(infoCatcher != null){
-              grailsChannel.append(`${infoCatcher[0]}\n`);
+              grailsChannel.appendLine(`${infoCatcher[0]}`);
               if(createCatcher != null){
                 vscode.window.showInformationMessage(`Interceptor '${interceptorName}' was created.`);
               }
@@ -905,7 +908,7 @@ function createHibernateCfgXML(){
               infoCatcher      = outputFilter.match(/\w.+/gi);
               createCatcher    = outputFilter.match(/Created file grails-app\\conf\\hibernate\\hibernate.cfg.xml/gi);
               if(infoCatcher != null){
-                grailsChannel.append(`${infoCatcher[0]}\n`);
+                grailsChannel.appendLine(`${infoCatcher[0]}`);
                 if(createCatcher != null){
                   vscode.window.showInformationMessage(`The 'hibernate.cfg.xml' file was created.`);
                 }
@@ -936,7 +939,7 @@ function createScript(){
           infoCatcher   = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created file scripts/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Script '${scriptName}.groovy' was created.`);
             }
@@ -967,7 +970,7 @@ function createTagLib(){
           infoCatcher   = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created grails-app/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Taglib '${tagLibName}TagLib.groovy' was created.`);
             }
@@ -992,7 +995,7 @@ function createUnitTest(){
           infoCatcher   = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created file test/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Unit Test '${unitTestName}Spec.groovy' was created.`);
             }
@@ -1017,7 +1020,7 @@ function createIntegrationTest(){
           infoCatcher  = outputFilter.match(/\w.+/gi);
           createCatcher = outputFilter.match(/Created file test/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
             if(createCatcher != null){
               vscode.window.showInformationMessage(`Integration Test '${integrationTestName}IntegrationSpec.groovy' was created.`);
             }
@@ -1045,7 +1048,7 @@ function createPOM(){
             infoCatcher  = outputFilter.match(/\w.+/gi);
             createCatcher = outputFilter.match(/POM generated/gi);
             if(infoCatcher != null){
-              grailsChannel.append(`${infoCatcher[0]}\n`);
+              grailsChannel.appendLine(`${infoCatcher[0]}`);
               if(createCatcher != null){
                 vscode.window.showInformationMessage(`The POM.xml file was created.`);
               }
@@ -1071,11 +1074,11 @@ function generateViews(){
           outputFilter = data;
           infoCatcher  = outputFilter.match(/\w.+/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
           }
         });
         result.stdout.on("end",()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
         resolve();
       });
@@ -1095,11 +1098,11 @@ function generateControllers(){
           outputFilter = data;
           infoCatcher  = outputFilter.match(/\w.+/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
           }
         });
         result.stdout.on("end",()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
         resolve();
       });
@@ -1119,11 +1122,11 @@ function generateAll(){
           outputFilter = data;
           infoCatcher  = outputFilter.match(/\w.+/gi);
           if(infoCatcher != null){
-            grailsChannel.append(`${infoCatcher[0]}\n`);
+            grailsChannel.appendLine(`${infoCatcher[0]}`);
           }
         });
         result.stdout.on("end",()=>{
-          grailsChannel.append(`Done!`);
+          grailsChannel.appendLine(`Done!`);
         });
         resolve();
       });
@@ -1135,7 +1138,6 @@ function generateAll(){
 
 
 module.exports ={
-  showGrailsChannel,
   getWorkspaceDir,
   checkIfIsAGrailsProject,
   checkIfIsAGrailsPlugin,
