@@ -1,13 +1,29 @@
 {
   "name": "gfvscode",
-  "displayName": "Grails",
+  "displayName": "Grails For VSCode",
   "description": "Develop Grails Applications easy on VSCode",
-  "version": "0.0.1",
+  "icon": "img/grails_logo.png",
+  "version": "1.0.0",
+  "publisher": "GDOTecnologia",
+  "author": {
+    "name": "Guilherme Demiciano Orsolon",
+    "email": "guilherme_tribbalz@hotmail.com"
+  },
   "engines": {
     "vscode": "^1.66.0"
   },
+  "license": "MIT",
+  "homepage": "https://github.com/GuiOrsolon/gfvscode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GuiOrsolon/gfvscode"
+  },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "grails",
+    "groovy"
   ],
   "activationEvents": [
     "*"
