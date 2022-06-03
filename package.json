@@ -76,6 +76,16 @@
         "title": "Generate WAR"
       },
       {
+        "command": "gfvscode.packagePlugin",
+        "category": "Grails Plugin",
+        "title": "Package Plugin"
+      },
+      {
+        "command": "gfvscode.mavenInstall",
+        "category": "Grails Plugin",
+        "title": "Maven Install"
+      },
+      {
         "command": "gfvscode.migrateDocs",
         "category": "Grails",
         "title": "Migrate Docs"

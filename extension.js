@@ -95,6 +95,18 @@ function activate(context) {
 	);
 
 	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.packagePlugin', function(){
+			functions.packagePlugin();
+		})
+	);
+
+	context.subscriptions.push(
+		vscode.commands.registerCommand('gfvscode.mavenInstall', function(){
+			functions.mavenInstall();
+		})
+	);
+
+	context.subscriptions.push(
 		vscode.commands.registerCommand('gfvscode.addProxy', function(){
 			functions.addProxy(false);
 		})
@@ -210,6 +222,7 @@ function activate(context) {
 
 	if(functions.checkIfIsAGrailsProject() != null){
 		functions.defineAppProperties();
+		functions.checkIfIsAGrailsPlugin();
 	}	
 }
 

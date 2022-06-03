@@ -21,6 +21,7 @@ let stbarConfig      = [];
 let applicationName  = '';
 let grailsVersion    = '';
 let grailsCommand    = '';
+let isAPluginGrails  = '';
 
 //Filters and Catchers
 
@@ -62,6 +63,18 @@ function checkIfIsAGrailsProject(){
       return false;
   }else{
     return null;
+  }
+}
+
+function checkIfIsAGrailsPlugin(){
+  let properties  = pr(path.join(getWorkspaceDir(),'application.properties'));
+  grailsVersion   = properties.get("app.grails.version");
+  applicationName = properties.get("app.name");
+  if(getWorkspaceDir() != null){
+    if(fs.existsSync(path.join(getWorkspaceDir(),`${applicationName}GrailsPlugin.groovy`))){
+      vscode.window.showInformationMessage(`Grails Plugin Project Detected`);
+      isAPluginGrails = 'yes';
+    }
   }
 }
 
@@ -424,11 +437,11 @@ function generateDoc(){
     let result = cp.exec(`${command}`, {cwd: getWorkspaceDir()});
     result.stdout.on("data",(data)=>{
       grailsChannel.append(`${data}`);
-      resolve();
     });
     result.stdout.on("end", ()=>{
       grailsChannel.append(`Done!`);
     });
+    resolve();
   });
   return promise;
 }
@@ -444,13 +457,59 @@ function createWar(){
       if(infoCatcher != null){
         grailsChannel.append(`${infoCatcher[0]}\n`);
       }
-      resolve();
     });
     result.stdout.on("end", ()=>{
       grailsChannel.append(`Done!`);
     });
+    resolve();
   });
   return promise;
+}
+
+function packagePlugin(){
+  if(isAPluginGrails != 'yes'){
+    vscode.window.showErrorMessage(`Unable to create a package if the project is not a Grails Plugin!`);
+  }else{
+    grailsChannel.show();
+    let promise = new Promise(resolve =>{
+      let result = cp.exec(`grails package-plugin`,{cwd: getWorkspaceDir()});
+      result.stdout.on("data", (data)=>{
+        outputFilter = data;
+        infoCatcher  = outputFilter.match(/\w.+/gi);
+        if(infoCatcher != null){
+          grailsChannel.append(`${infoCatcher[0]}\n`);
+        }
+      });
+      result.stdout.on("end",()=>{
+        grailsChannel.append(`Done!`);
+      });
+      resolve();
+    });
+    return promise;
+  }
+}
+
+function mavenInstall(){
+  if(isAPluginGrails != 'yes'){
+    vscode.window.showErrorMessage(`Unable to perform Maven Install if the project is not a Grails Plugin!`);
+  }else{
+    grailsChannel.show();
+    let promise = new Promise(resolve =>{
+      let result = cp.exec(`grails maven-install`, {cwd: getWorkspaceDir()});
+      result.stdout.on("data",(data)=>{
+        outputFilter = data;
+        infoCatcher  = outputFilter.match(/\w.+/gi);
+        if(infoCatcher != null){
+          grailsChannel.append(`${infoCatcher[0]}\n`);
+        }
+      });
+      result.stdout.on("end",()=>{
+        grailsChannel.append(`Done!`);
+      });
+      resolve();
+    });
+    return promise;
+  }
 }
 
 function migrateDocs(){
@@ -1079,6 +1138,7 @@ module.exports ={
   showGrailsChannel,
   getWorkspaceDir,
   checkIfIsAGrailsProject,
+  checkIfIsAGrailsPlugin,
   defineAppProperties,
   getGrailsVersion,
   setStatusBarItem,
@@ -1097,6 +1157,8 @@ module.exports ={
   generateDoc,
   migrateDocs,
   createWar,
+  packagePlugin,
+  mavenInstall,
   addProxy,
   clearProxy,
   removeProxy,
